@@ -27,6 +27,9 @@ async function run() {
 
     // collections
     const usersCollection = client.db("repliqEcommerce").collection("users");
+    const productsCollection = client
+      .db("repliqEcommerce")
+      .collection("products");
 
     // user related APIs
 
@@ -55,6 +58,28 @@ async function run() {
       }
 
       const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // product related APIs
+
+    // get all the products
+    app.get("/products", async (req, res) => {
+      const result = await productsCollection.find().toArray();
+      res.send(result);
+    });
+
+    // add product API
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      const query = { name: product?.name };
+      const existingProduct = await productsCollection.findOne(query);
+
+      if (existingProduct) {
+        return res.send({ message: "product already added" });
+      }
+
+      const result = await productsCollection.insertOne(product);
       res.send(result);
     });
 
