@@ -23,7 +23,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // collections
     const usersCollection = client.db("repliqEcommerce").collection("users");
@@ -40,6 +40,14 @@ async function run() {
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
+    // get specific user by id
+    app.get("/usersId/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
       const result = await usersCollection.findOne(query);
       res.send(result);
     });
@@ -85,7 +93,7 @@ async function run() {
     // product add to cart API
     app.post("/cartProducts", async (req, res) => {
       const cartProduct = req.body;
-      const query = { name: cartProduct.name };
+      const query = { name: cartProduct.name, email: cartProduct.email };
       const existingProduct = await cartProductsCollection.findOne(query);
 
       if (existingProduct) {
