@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -30,6 +30,9 @@ async function run() {
     const productsCollection = client
       .db("repliqEcommerce")
       .collection("products");
+    const cartProductsCollection = client
+      .db("repliqEcommerce")
+      .collection("cartProducts");
 
     // user related APIs
 
@@ -63,9 +66,37 @@ async function run() {
 
     // product related APIs
 
+    // get products of cart
+    app.get("/cartProducts", async (req, res) => {
+      const result = await cartProductsCollection.find().toArray();
+      res.send(result);
+    });
+
+    // product add to cart API
+    app.post("/cartProducts", async (req, res) => {
+      const cartProduct = req.body;
+      const query = { name: cartProduct.name };
+      const existingProduct = await cartProductsCollection.findOne(query);
+
+      if (existingProduct) {
+        return res.send({ message: "Product already added to cart" });
+      }
+
+      const result = await cartProductsCollection.insertOne(cartProduct);
+      res.send(result);
+    });
+
     // get all the products
     app.get("/products", async (req, res) => {
       const result = await productsCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get single product
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.findOne(query);
       res.send(result);
     });
 
