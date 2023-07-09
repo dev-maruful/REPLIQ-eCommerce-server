@@ -66,9 +66,19 @@ async function run() {
 
     // product related APIs
 
-    // get products of cart
-    app.get("/cartProducts", async (req, res) => {
-      const result = await cartProductsCollection.find().toArray();
+    // get products from cart products
+    app.get("/cartProducts/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await cartProductsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete product from cart
+    app.delete("/cartProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartProductsCollection.deleteOne(query);
       res.send(result);
     });
 
